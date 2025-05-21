@@ -1,109 +1,107 @@
-# Earnings Call Tone Research
+# Tone-Dispersion Factor Research
 
-This project analyzes the tone/sentiment of company earnings call transcripts using natural language processing.
+*Within-call sentiment variance as a market-neutral signal*
 
-## Setup
+---
 
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\\Scripts\\activate
-   ```
+## Project Layout
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   pip install datasets transformers
-   ```
-
-3. Set up API keys:
-   - This project uses real data sources and does not support mocking
-   - You must obtain API keys for Pinecone and Financial Modeling Prep
-   - Update the API keys in `research/config.yml`
-
-4. Generate sentiment anchor vector:
-   ```bash
-   python research/create_sentiment_anchor.py
-   ```
-
-## Features
-
-- **Sentiment analysis** of earnings call transcripts using NLTK's VADER sentiment analyzer
-- **Batch processing** of multiple transcript files
-- **Metadata extraction** from transcript filenames and content
-- **Visualization tools** for sentiment distribution and trends
-- **Strategy analysis** for potential financial applications
-- **Hugging Face dataset integration** for real earnings call transcript data
-
-## Usage
-
-### Basic Analysis
-
-Run the full pipeline to generate tone dispersion signals and backtest:
-
-```bash
-# Step 1: Download sentence data from Pinecone
-python research/01_pinecone_download.py
-
-# Step 2: Compute tone dispersion signal
-python research/02_signal_compute.py
-
-# Step 3: Run backtest
-python research/03_backtest.py
+```
+earnings_call_tone_research/
+│
+├─ run_backtest.py            # one-shot: build → neutralise → weights → PnL│
+├─ src/                       # pure-Python research pipeline
+│   ├─ load.py                # reads the three parquet inputs
+│   ├─ factor_build.py        # z-scores tone dispersion by trade-date
+│   ├─ neutralise.py          # FF5+UMD regression (daily)
+│   ├─ portfolio.py           # weight construction & PnL
+│   └─ report.py              # quick tear-sheet
+│
+├─ data/                      # **exactly three parquet files**
+│   ├─ tone_dispersion.parquet   # call-level dispersion
+│   ├─ stock_prices.parquet      # wide adj-close matrix, index=date
+│   └─ ff5_daily.parquet         # daily MKT, SMB, HML, RMW, CMA, UMD, RF
+│
+└─ tests/                     # pytest suite (unit + integration)
 ```
 
-### Alternative Data Source
+---
 
-If you don't have Pinecone access, you can use the Hugging Face dataset:
+## Required Inputs
+
+| file                         | expected schema                                                |
+| ---------------------------- | -------------------------------------------------------------- |
+| **tone\_dispersion.parquet** | Columns: `symbol`, `date`, `tone_dispersion`                   |
+| **stock\_prices.parquet**    | Wide table; `index=date`, `columns=tickers`, `values=adjClose` |
+| **ff5\_daily.parquet**       | `index=date`; columns `mktrf smb hml rmw cma umd rf`           |
+
+No other data sources or credentials are required.
+
+---
+
+## Tone-Dispersion Calculation  🛈
+
+* **Granularity:** each *speaker-turn* (a continuous block of speech by one speaker) inside the earnings-call transcript.
+* **Sentiment score:** a scalar in **\[-1, 1]** produced by a local language-model sentiment head (or any deterministic sentiment function).
+
+  ```text
+  sentiment(turn_i)  →  s_i
+  ```
+* **Dispersion metric:** **population variance** of all scores within the call
+  (executive + analyst turns):
+
+  $$
+    \text{tone\_dispersion} \;=\;
+    \frac{1}{N}\sum_{i=1}^{N} \bigl(s_i-\bar{s}\bigr)^2,
+    \qquad \bar{s}=\frac{1}{N}\sum s_i
+  $$
+
+  *Requires at least two non-empty turns; otherwise NaN.*
+
+The resulting table written to `data/tone_dispersion.parquet` therefore holds **one row per call**:
+
+| symbol | date (call timestamp) | tone\_dispersion |
+| ------ | --------------------- | ---------------- |
+| AAPL   | 2024-10-24 16:30:00   | 0.0134           |
+| MSFT   | 2024-10-26 17:00:00   | 0.0027           |
+| …      | …                     | …                |
+
+During factor construction the script:
+
+1. Shifts `date` to the **next NYSE trading day** (`trade_date`).
+2. Z-scores `tone_dispersion` cross-sectionally each `trade_date` to remove level shifts.
+3. Feeds the standardized series to the FF5+UMD neutralisation step.
+
+## Quick-Start
 
 ```bash
-# Process Hugging Face dataset into sentence data
-python research/hf_to_sentence_data.py --tickers AAPL,MSFT,AMZN,GOOG
+# 1. create environment
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 2. drop the three parquet files into data/
+
+# 3. run the pipeline
+python run_backtest.py          # writes outputs/weights.parquet & tear-sheet
+
+# 4. run tests
+pytest -q                       # sanity-checks factor, alignment and PnL
 ```
 
-### Download Stock Price Data
+---
 
-Download historical stock prices using Financial Modeling Prep API:
+## Modifying the Research
 
-```bash
-python research/download_stock_data.py
-```
+| Task                    | Where                        |
+| ----------------------- | ---------------------------- |
+| Change holding horizon  | `portfolio.pnl(horizon=N)`   |
+| Different risk model    | `src/neutralise.py`          |
+| Custom weighting scheme | `src/portfolio.py`           |
+| Add transaction costs   | debit inside `portfolio.pnl` |
 
-## Data Sources
-
-This project uses real data sources:
-
-1. **Earnings Call Transcripts**:
-   - Pinecone index with processed transcripts (requires API key)
-   - Hugging Face dataset `kurry/sp500_earnings_transcripts`
-
-2. **Stock Price Data**:
-   - Financial Modeling Prep API (requires API key)
-
-3. **Factor Data**:
-   - French Data Library (manual download)
-
-## Using Real Data vs. Mocking
-
-This project has been updated to use real data sources exclusively and does not support mocked data:
-
-- No mock data is generated as fallbacks
-- Scripts will exit with appropriate error messages if required data or API keys are missing
-- Each step in the pipeline requires the previous step to have been completed successfully
-
-## Clean Cache Files
-
-To clean up cache directories and temporary files:
-
-```bash
-python clean.py
-```
-
-## Documentation
-
-See the [GitHub Pages website](https://financial-research.github.io/earnings-call-tone-research/) for more detailed documentation.
+---
 
 ## License
 
-MIT
- 
+MIT – use, adapt, and share.
