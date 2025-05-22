@@ -18,7 +18,18 @@ REQ = [
 
 
 def _have_all_files():
-    return all(p.exists() for p in REQ)
+    for p in REQ:
+        if not p.exists():
+            return False
+        try:
+            with p.open('rb') as f:
+                first = f.readline()
+            # skip Git LFS pointer files
+            if first.startswith(b'version https://git-lfs.github.com'):
+                return False
+        except Exception:
+            return False
+    return True
 
 
 ###############################################################################

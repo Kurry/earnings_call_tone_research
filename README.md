@@ -100,8 +100,18 @@ pytest -q                       # sanity-checks factor, alignment and PnL
 | Custom weighting scheme | `src/portfolio.py`           |
 | Add transaction costs   | debit inside `portfolio.pnl` |
 
----
+## GitHub Pages
 
+You can host the backtest results and tear sheet using GitHub Pages:
+
+1. Run `python run_backtest.py` to generate the `outputs/tearsheet.html` file.
+2. Commit and push the `outputs/` directory to your repository.
+3. In your GitHub repository settings, enable Pages with:
+   - Source: *main* branch
+   - Folder: */ (root)*
+4. Navigate to `https://<username>.github.io/earnings_call_tone_research/outputs/tearsheet.html` to view the tear sheet.
+
+---
 ## License
 
 MIT – use, adapt, and share.

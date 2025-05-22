@@ -1,4 +1,6 @@
 # src/portfolio.py
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -9,31 +11,112 @@ def _date(idx):
     return idx.get_level_values(0) if isinstance(idx, pd.MultiIndex) else idx
 
 
-def build_weights(signal: pd.Series, gross: float = 1.0) -> pd.DataFrame:
+def build_weights(
+    signal: pd.Series, gross: float = 1.0, smoothing: float = 0.75
+) -> pd.DataFrame:
     """
     Long–short weights with ∑|w| = gross and ∑w = 0 inside each day,
-    even if only two securities are present.
+    with optional smoothing between days to control turnover.
+
+    Parameters:
+    -----------
+    signal : pd.Series
+        Factor signal with MultiIndex (date, symbol)
+    gross : float
+        Target gross exposure (sum of absolute weights)
+    smoothing : float
+        Weight between 0 and 1 determining how much to retain previous day weights
+        0 = no smoothing (complete portfolio turnover each day)
+        1 = maximum smoothing (weights never change)
+        Default is 0.75 (75% retention of previous day weights)
     """
+    if not (0 <= smoothing <= 1):
+        raise ValueError("Smoothing parameter must be between 0 and 1")
+
     dlevel = _date(signal.index)
 
-    # centred rank in [-1,1]  :  (2*rank-1)/n
+    # First calculate the target weights without smoothing (same as original)
+    # centred rank in [-1,1]  :  (2*rank - n - 1)/n
     r = signal.groupby(dlevel).rank(method="first").astype(float)
     n = signal.groupby(dlevel).transform("count")
-    centred = (2 * r - 1) / n
+    centred = (2 * r - n - 1) / n
 
+    # Scale to desired gross exposure
     scaled = centred / centred.abs().groupby(dlevel).transform("sum") * gross
 
-    # guarantee DataFrame even if single date or ticker
-    return scaled.unstack(fill_value=0.0).astype(float)
+    # Convert to DataFrame
+    target_weights = scaled.unstack(fill_value=0.0).astype(float)
+
+    # If no smoothing requested, return the target weights directly
+    if smoothing == 0:
+        return target_weights
+
+    # Apply weight smoothing between days
+    dates = sorted(target_weights.index)
+    all_symbols = target_weights.columns
+
+    # Initialize with first day's weights
+    smoothed_weights = pd.DataFrame(index=dates, columns=all_symbols, dtype=float)
+    smoothed_weights.iloc[0] = target_weights.iloc[0]
+
+    # For each subsequent day, blend previous day's weights with target weights
+    for i in range(1, len(dates)):
+        prev_date = dates[i - 1]
+        curr_date = dates[i]
+
+        # Blend weights: new_weight = (1-smoothing) * target_weight + smoothing * prev_weight
+        prev_weights = smoothed_weights.loc[prev_date]
+        target = target_weights.loc[curr_date]
+
+        blended = (1 - smoothing) * target + smoothing * prev_weights
+
+        # Re-normalize to ensure gross exposure constraint is maintained
+        # This step ensures sum(abs(weights)) = gross
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            gross_exposure = blended.abs().sum()
+            if gross_exposure > 0:  # Avoid division by zero
+                blended = blended * (gross / gross_exposure)
+
+        # Ensure weights sum to zero (market neutral)
+        net_exposure = blended.sum()
+        if abs(net_exposure) > 1e-10:  # Only adjust if meaningfully different from zero
+            # Distribute the net exposure equally among non-zero weights
+            non_zero = blended != 0
+            num_non_zero = non_zero.sum()
+
+            if num_non_zero > 0:
+                adjustment = net_exposure / num_non_zero
+                blended[non_zero] -= adjustment
+
+        smoothed_weights.loc[curr_date] = blended
+
+    return smoothed_weights
 
 
 def pnl(weights: pd.DataFrame, horizon: int = 5) -> pd.Series:
+    """Calculate PnL series from weights and forward returns"""
     px = prices()
     common = weights.columns.intersection(px.columns)
     if common.empty:
         raise ValueError("weights vs price columns have no overlap")
 
-    fwd = px[common].pct_change(horizon).shift(-horizon)
-    wl = weights[common].shift(1).reindex(fwd.index).fillna(0.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)
+        fwd = px[common].pct_change(horizon).shift(-horizon)
 
+    wl = weights[common].shift(1).reindex(fwd.index).fillna(0.0)
     return (wl * fwd).sum(axis=1).dropna()
+
+
+def calculate_turnover(weights: pd.DataFrame) -> pd.Series:
+    """
+    Calculate the daily portfolio turnover.
+
+    Turnover is defined as the sum of absolute weight changes divided by 2.
+    A turnover of 1.0 means complete portfolio replacement.
+    """
+    weights_shifted = weights.shift(1)
+    daily_turnover = (weights - weights_shifted).abs().sum(axis=1).dropna() / 2
+    return daily_turnover
+    return daily_turnover

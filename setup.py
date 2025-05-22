@@ -23,6 +23,7 @@ setup(
         # Utilities
         "tqdm",
         "pyyaml",
+        "alpahalens-reloaded",
     ],
     extras_require={
         "dev": [
