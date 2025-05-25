@@ -113,11 +113,12 @@ pytest -q                       # sanity-checks factor, alignment and PnL
 You can host the backtest results and tear sheet using GitHub Pages:
 
 1. Run `python run_backtest.py` to generate the `outputs/tearsheet.html` file.
-2. Commit and push the `outputs/` directory to your repository.
-3. In your GitHub repository settings, enable Pages with:
+2. Copy the generated tear sheet to the `docs/` directory or reference it from there.
+3. Commit and push the `docs/` directory to your repository.
+4. In your GitHub repository settings, enable Pages with:
    - Source: *main* branch
-   - Folder: */ (root)*
-4. Navigate to `https://kurry.github.io/earnings_call_tone_research/outputs/tearsheet.html` to view the tear sheet.
+   - Folder: */docs*
+5. Navigate to `https://kurry.github.io/earnings_call_tone_research/` to view the documentation site.
 
 ---
 ## License
