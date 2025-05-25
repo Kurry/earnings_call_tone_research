@@ -4,18 +4,12 @@ on:
   push:
     branches: [ master, main ]
     paths: 
-      - '*.md'
-      - '_config.yml'
-      - 'Gemfile'
-      - 'assets/**'
+      - 'docs/**'
       - '.github/workflows/deploy-pages.yml'
   pull_request:
     branches: [ master, main ]
     paths: 
-      - '*.md'
-      - '_config.yml'
-      - 'Gemfile'
-      - 'assets/**'
+      - 'docs/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,6 +36,7 @@ jobs:
         with:
           ruby-version: '3.1'
           bundler-cache: true
+          working-directory: ./docs
           
       - name: Setup Pages
         id: pages
@@ -49,16 +44,18 @@ jobs:
         
       - name: Install dependencies
         run: bundle install
+        working-directory: ./docs
           
       - name: Build with Jekyll
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        working-directory: ./docs
         env:
           JEKYLL_ENV: production
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: docs/_site
 
   # Deployment job
   deploy:
