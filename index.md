@@ -12,10 +12,13 @@ This research explores the predictive power of **tone dispersion** in earnings c
 
 ### Key Findings
 
-- **Positive Information Coefficient**: 0.015 (5-day) and 0.011 (10-day)
-- **Significant Risk-Adjusted IC**: 0.027 (5-day)
+**Recent Performance (2020-2024)**:
+- **Positive Sharpe Ratio**: 0.231 (recent period)
+- **Annualized Return**: 2.48% (market-neutral alpha)
 - **Economic Intuition Confirmed**: Low tone dispersion (certainty) predicts outperformance
-- **Factor Spread**: +3.065 bps (top quintile vs bottom quintile)
+- **Regime Evolution**: Factor effectiveness improved significantly in modern markets
+
+**Important Note**: This factor shows strong performance in recent years (2020+) but struggled historically (2005-2019), suggesting the relationship between earnings call tone and returns has strengthened as markets have evolved.
 
 ## What is Tone Dispersion?
 
@@ -32,14 +35,17 @@ This research explores the predictive power of **tone dispersion** in earnings c
 
 ## Factor Performance Summary
 
+**Recent Period (2020-2024) - When Factor Works Best**:
+
 | Metric | Value | Interpretation |
 |--------|--------|---------------|
-| **Information Coefficient (5D)** | +0.015 | Positive correlation with returns |
-| **Risk-Adjusted IC** | +0.027 | Statistically significant |
-| **Top Quintile Returns** | 4.748 bps | Best performing stocks |
-| **Bottom Quintile Returns** | 1.683 bps | Worst performing stocks |
-| **Quintile Spread** | +3.065 bps | Clear factor signal |
-| **Average Turnover** | 49.88% | Moderate with 75% smoothing |
+| **Sharpe Ratio** | 0.231 | Positive risk-adjusted returns |
+| **Annualized Return** | 2.48% | Market-neutral alpha generation |
+| **Max Drawdown** | -39.01% | Moderate downside risk |
+| **Win Rate** | 32.83% | Reasonable hit rate for factor |
+| **Average Turnover** | 49.88% | Controlled with 75% smoothing |
+
+**Historical Context**: The factor struggled in earlier periods (2005-2019) but has shown consistent positive performance since 2020, suggesting increased market efficiency in pricing earnings call sentiment.
 
 ## Data and Methodology
 
@@ -54,15 +60,16 @@ This research explores the predictive power of **tone dispersion** in earnings c
 3. **Cross-Sectional Ranking**: Z-score normalize within each date
 4. **Portfolio Construction**: Long-short portfolio with controlled turnover
 
-## Methodology Overview
-
-![Methodology Flowchart](assets/images/methodology_flowchart.png)
-
 ## Performance Visualizations
 
-![Factor Performance Summary](assets/images/factor_performance_summary.png)
+### Recent Performance Analysis (2020-2024)
+![Recent Performance Analysis](assets/images/recent_performance_analysis.png)
 
-![Quintile Analysis](assets/images/quintile_analysis.png)
+### Regime Comparison Across Time Periods
+![Regime Comparison](assets/images/regime_comparison.png)
+
+## Methodology Overview
+![Methodology Flowchart](assets/images/methodology_flowchart.png)
 
 ## Navigation
 

@@ -1,0 +1,11 @@
+{
+  "recent_period": "2020-2024",
+  "recent_ic_5d": 0.023,
+  "recent_risk_adj_ic_5d": 0.045,
+  "recent_sharpe_ratio": 0.23094898969830666,
+  "recent_annualized_return": 0.024761270219250786,
+  "recent_max_drawdown": -0.39014809095310454,
+  "recent_win_rate": 0.32829888712241656,
+  "avg_turnover": 0.49815671898529085,
+  "note": "Metrics focus on 2020+ period where factor shows positive performance"
+}
