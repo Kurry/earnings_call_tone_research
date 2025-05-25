@@ -7,7 +7,11 @@
       "Bash(python -m pytest tests/test_integration.py::test_parquet_not_empty -v)",
       "Bash(python:*)",
       "Bash(mkdir:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(gh run view:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

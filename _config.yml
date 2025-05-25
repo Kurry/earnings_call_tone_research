@@ -34,6 +34,7 @@ collections:
 # Exclude from processing
 exclude:
   - README.md
+  - docs_README.md
   - Gemfile
   - Gemfile.lock
   - node_modules
@@ -41,6 +42,14 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+  - src/
+  - tests/
+  - data/
+  - outputs/
+  - venv/
+  - "*.py"
+  - "*.txt"
+  - "*.parquet"
 
 # Google Analytics (optional)
 # google_analytics: UA-XXXXXXXX-X
