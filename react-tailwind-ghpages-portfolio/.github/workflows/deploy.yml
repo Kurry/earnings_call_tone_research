@@ -1,0 +1,38 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Or 'master' depending on your default branch name
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push to gh-pages branch
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4 # Updated to v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # Updated to v4
+        with:
+          node-version: '18' # Specify Node.js version, e.g., 18 or 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        # Uses the base path from vite.config.js
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          # user_name: 'github-actions[bot]' # Optional: Custom committer name
+          # user_email: 'github-actions[bot]@users.noreply.github.com' # Optional: Custom committer email
+          # commit_message: 'Deploy to GitHub Pages' # Optional: Custom commit message
