@@ -9,7 +9,7 @@
 ```
 earnings_call_tone_research/
 │
-├─ run_backtest.py            # one-shot: build → neutralise → weights → PnL│
+├─ run_backtest.py            # one-shot: build → neutralise → weights → PnL
 ├─ src/                       # pure-Python research pipeline
 │   ├─ load.py                # reads the three parquet inputs
 │   ├─ factor_build.py        # z-scores tone dispersion by trade-date
@@ -31,9 +31,9 @@ earnings_call_tone_research/
 
 | file                         | expected schema                                                |
 | ---------------------------- | -------------------------------------------------------------- |
-| **tone\_dispersion.parquet** | Columns: `symbol`, `date`, `tone_dispersion`                   |
-| **stock\_prices.parquet**    | Wide table; `index=date`, `columns=tickers`, `values=adjClose` |
-| **ff5\_daily.parquet**       | `index=date`; columns `mktrf smb hml rmw cma umd rf`           |
+| **tone_dispersion.parquet**  | Columns: `symbol`, `date`, `tone_dispersion`                   |
+| **stock_prices.parquet**     | Wide table; `index=date`, `columns=tickers`, `values=adjClose` |
+| **ff5_daily.parquet**        | `index=date`; columns `mktrf smb hml rmw cma umd rf`           |
 
 No other data sources or credentials are required.
 
@@ -43,32 +43,36 @@ The sentiment analysis component of this research relies on earnings call transc
 
 ---
 
-## Tone-Dispersion Calculation  🛈
+## Tone-Dispersion Calculation 🛈
 
-* **Granularity:** each *speaker-turn* (a continuous block of speech by one speaker) inside the earnings-call transcript.
-* **Sentiment score:** a scalar in **\[-1, 1]** produced by a local language-model sentiment head (or any deterministic sentiment function).
+* **Granularity:** Each *speaker-turn* (a continuous block of speech by one speaker) inside the earnings-call transcript is scored.
+* **Sentiment score:** Each turn receives a scalar in **[-1, 1]** from a local language-model sentiment head (or any deterministic sentiment function):
 
   ```text
-  sentiment(turn_i)  →  s_i
+  sentiment(turn_i) → s_i
   ```
-* **Dispersion metric:** **population variance** of all scores within the call
-  (executive + analyst turns):
+* **Dispersion metric:** The **population variance** of all sentiment scores within the call (including both executive and analyst turns):
 
   $$
-    \text{tone\_dispersion} \;=\;
-    \frac{1}{N}\sum_{i=1}^{N} \bigl(s_i-\bar{s}\bigr)^2,
-    \qquad \bar{s}=\frac{1}{N}\sum s_i
+  \text{tone_dispersion} = \frac{1}{N} \sum_{i=1}^{N} (s_i - \bar{s})^2, \qquad \bar{s} = \frac{1}{N} \sum_{i=1}^{N} s_i
   $$
 
-  *Requires at least two non-empty turns; otherwise NaN.*
+  *Requires at least two non-empty turns; otherwise, the value is NaN.*
+  
+  *Note: This formula requires a Markdown viewer that supports LaTeX math rendering. For reference, in plain code:*
+  
+  ```python
+  mean = sum(scores) / len(scores)
+  variance = sum((s - mean) ** 2 for s in scores) / len(scores)
+  ```
 
 The resulting table written to `data/tone_dispersion.parquet` therefore holds **one row per call**:
 
-| symbol | date (call timestamp) | tone\_dispersion |
-| ------ | --------------------- | ---------------- |
-| AAPL   | 2024-10-24 16:30:00   | 0.0134           |
-| MSFT   | 2024-10-26 17:00:00   | 0.0027           |
-| …      | …                     | …                |
+| symbol | date (call timestamp) | tone_dispersion |
+| ------ | --------------------- | --------------- |
+| AAPL   | 2024-10-24 16:30:00   | 0.0134          |
+| MSFT   | 2024-10-26 17:00:00   | 0.0027          |
+| ...    | ...                   | ...             |
 
 During factor construction the script:
 
@@ -102,7 +106,7 @@ pytest -q                       # sanity-checks factor, alignment and PnL
 | Change holding horizon  | `portfolio.pnl(horizon=N)`   |
 | Different risk model    | `src/neutralise.py`          |
 | Custom weighting scheme | `src/portfolio.py`           |
-| Add transaction costs   | debit inside `portfolio.pnl` |
+| Add transaction costs   | modify logic inside `portfolio.pnl` |
 
 ## GitHub Pages
 
@@ -118,4 +122,4 @@ You can host the backtest results and tear sheet using GitHub Pages:
 ---
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
