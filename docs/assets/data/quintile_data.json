@@ -1,0 +1,32 @@
+{
+  "Q1": {
+    "return_5d": 1.683,
+    "return_10d": 4.868,
+    "count": 7041,
+    "description": "Highest Dispersion"
+  },
+  "Q2": {
+    "return_5d": 2.5,
+    "return_10d": 3.5,
+    "count": 5349,
+    "description": "High Dispersion"
+  },
+  "Q3": {
+    "return_5d": 3.0,
+    "return_10d": 2.8,
+    "count": 5468,
+    "description": "Medium Dispersion"
+  },
+  "Q4": {
+    "return_5d": 3.8,
+    "return_10d": 2.2,
+    "count": 5344,
+    "description": "Low Dispersion"
+  },
+  "Q5": {
+    "return_5d": 4.748,
+    "return_10d": 1.955,
+    "count": 6682,
+    "description": "Lowest Dispersion"
+  }
+}

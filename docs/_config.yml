@@ -1,0 +1,61 @@
+# Jekyll configuration for GitHub Pages
+title: "Earnings Call Tone Dispersion Research"
+description: "A quantitative analysis of tone dispersion in earnings calls and its predictive power for stock returns"
+baseurl: ""
+url: "https://USERNAME.github.io/earnings_call_tone_research"
+
+# Theme
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - index.md
+  - methodology.md
+  - results.md
+  - technical.md
+
+# Settings
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Exclude from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Google Analytics (optional)
+# google_analytics: UA-XXXXXXXX-X
+
+# Author
+author:
+  name: "Earnings Call Research Team"
+  email: "research@example.com"
+
+# Social links (optional)
+# github_username: username
+# twitter_username: username
+# linkedin_username: username
+
+# Build settings
+future: false
+unpublished: false
+safe: true

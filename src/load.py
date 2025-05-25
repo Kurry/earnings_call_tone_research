@@ -33,4 +33,3 @@ def prices():
 
 def tone_calls() -> pd.DataFrame:
     return pd.read_parquet(DATA / "tone_dispersion.parquet")
-    return pd.read_parquet(DATA / "tone_dispersion.parquet")

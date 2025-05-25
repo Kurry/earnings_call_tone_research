@@ -8,7 +8,13 @@ from .load import tone_calls
 
 
 def build_daily_factor() -> pd.Series:
-    """Return z-scored tone‐dispersion indexed by trade_date + ticker."""
+    """Return z-scored tone‐dispersion indexed by trade_date + ticker.
+    
+    Note: We negate the tone dispersion because:
+    - High tone dispersion = high uncertainty = poor future performance
+    - Low tone dispersion = low uncertainty = good future performance
+    - Factor should be positive for stocks expected to outperform
+    """
     calls = tone_calls()
 
     # robust datetime parse from 'date' or 'trade_date'
@@ -31,6 +37,9 @@ def build_daily_factor() -> pd.Series:
         .mean()
     )
     factor = calls.set_index(["trade_date", "symbol"])["tone_dispersion"].rename("tone_var")
+
+    # NEGATE the factor: low dispersion (certainty) = positive signal
+    factor = -factor
 
     # z-score cross-section
     factor = (

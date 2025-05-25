@@ -78,4 +78,3 @@ def test_weights_and_pnl(tiny_calls, tiny_prices, monkeypatch):
 
     pnl = pf.pnl(w, horizon=2)
     assert isinstance(pnl, pd.Series) and len(pnl) > 0
-    assert isinstance(pnl, pd.Series) and len(pnl) > 0

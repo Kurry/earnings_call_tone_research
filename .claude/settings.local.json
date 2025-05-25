@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "mcp__ide__executeCode",
+      "Bash(python3:*)",
+      "Bash(python -m pytest tests/test_integration.py::test_parquet_not_empty -v)",
+      "Bash(python:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)"
+    ],
+    "deny": []
+  }
+}

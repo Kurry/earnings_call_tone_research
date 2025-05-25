@@ -16,7 +16,7 @@ def build_weights(
 ) -> pd.DataFrame:
     """
     Long–short weights with ∑|w| = gross and ∑w = 0 inside each day,
-    with optional smoothing between days to control turnover.
+    with enhanced smoothing between days to control turnover.
 
     Parameters:
     -----------
@@ -35,11 +35,15 @@ def build_weights(
 
     dlevel = _date(signal.index)
 
-    # First calculate the target weights without smoothing (same as original)
-    # centred rank in [-1,1]  :  (2*rank - n - 1)/n
-    r = signal.groupby(dlevel).rank(method="first").astype(float)
+    # First calculate the target weights without smoothing
+    # Use improved ranking with midpoint tie handling
+    r = signal.groupby(dlevel).rank(method="average").astype(float)
     n = signal.groupby(dlevel).transform("count")
     centred = (2 * r - n - 1) / n
+
+    # Apply nonlinear transformation to enhance signal distinction
+    # This reduces the impact of noise in the middle of the distribution
+    centred = np.sign(centred) * np.abs(centred) ** 0.75
 
     # Scale to desired gross exposure
     scaled = centred / centred.abs().groupby(dlevel).transform("sum") * gross
@@ -51,7 +55,7 @@ def build_weights(
     if smoothing == 0:
         return target_weights
 
-    # Apply weight smoothing between days
+    # Apply improved weight smoothing between days
     dates = sorted(target_weights.index)
     all_symbols = target_weights.columns
 
@@ -64,14 +68,30 @@ def build_weights(
         prev_date = dates[i - 1]
         curr_date = dates[i]
 
-        # Blend weights: new_weight = (1-smoothing) * target_weight + smoothing * prev_weight
+        # Get previous weights and current target
         prev_weights = smoothed_weights.loc[prev_date]
         target = target_weights.loc[curr_date]
 
-        blended = (1 - smoothing) * target + smoothing * prev_weights
+        # Identify symbols with significant signal changes
+        signal_change = abs(target - prev_weights)
+        # Find symbols with significant changes (top 25%)
+        significant_change_threshold = signal_change.quantile(0.75)
+        significant_change = signal_change > significant_change_threshold
+
+        # Create a Series for adaptive smoothing factors
+        adaptive_smoothing = pd.Series(index=all_symbols, data=smoothing)
+        # Reduce smoothing for symbols with significant changes
+        adaptive_smoothing[significant_change] = max(0, smoothing - 0.25)
+
+        # Apply weighted blend with adaptive smoothing
+        blended = pd.Series(index=all_symbols)
+        for sym in all_symbols:
+            sym_smoothing = adaptive_smoothing[sym]
+            blended[sym] = (1 - sym_smoothing) * target[
+                sym
+            ] + sym_smoothing * prev_weights[sym]
 
         # Re-normalize to ensure gross exposure constraint is maintained
-        # This step ensures sum(abs(weights)) = gross
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             gross_exposure = blended.abs().sum()
@@ -81,13 +101,14 @@ def build_weights(
         # Ensure weights sum to zero (market neutral)
         net_exposure = blended.sum()
         if abs(net_exposure) > 1e-10:  # Only adjust if meaningfully different from zero
-            # Distribute the net exposure equally among non-zero weights
-            non_zero = blended != 0
-            num_non_zero = non_zero.sum()
+            # Distribute the net exposure proportionally to weight magnitude
+            weight_magnitude = blended.abs()
+            total_magnitude = weight_magnitude.sum()
 
-            if num_non_zero > 0:
-                adjustment = net_exposure / num_non_zero
-                blended[non_zero] -= adjustment
+            if total_magnitude > 0:
+                adjustment_factor = -net_exposure / total_magnitude
+                adjustment = weight_magnitude * adjustment_factor
+                blended += adjustment
 
         smoothed_weights.loc[curr_date] = blended
 
@@ -103,7 +124,7 @@ def pnl(weights: pd.DataFrame, horizon: int = 5) -> pd.Series:
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", FutureWarning)
-        fwd = px[common].pct_change(horizon).shift(-horizon)
+        fwd = px[common].pct_change(horizon, fill_method=None).shift(-horizon)
 
     wl = weights[common].shift(1).reindex(fwd.index).fillna(0.0)
     return (wl * fwd).sum(axis=1).dropna()
@@ -118,5 +139,4 @@ def calculate_turnover(weights: pd.DataFrame) -> pd.Series:
     """
     weights_shifted = weights.shift(1)
     daily_turnover = (weights - weights_shifted).abs().sum(axis=1).dropna() / 2
-    return daily_turnover
     return daily_turnover

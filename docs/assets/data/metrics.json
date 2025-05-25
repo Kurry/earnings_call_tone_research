@@ -1,0 +1,10 @@
+{
+  "ic_5d": 0.015,
+  "risk_adj_ic_5d": 0.027,
+  "quintile_spread_5d": 3.065,
+  "avg_turnover": 0.49877420579650267,
+  "sharpe_ratio": -0.30872872229191534,
+  "max_drawdown": -0.8744191002855066,
+  "annualized_return": -0.0547409805566581,
+  "win_rate": 0.20429252782193957
+}
