@@ -52,7 +52,6 @@ exclude:
   - "*.parquet"
 
 # Google Analytics (optional)
-# google_analytics: UA-XXXXXXXX-X
 
 # Author
 author:
@@ -61,8 +60,6 @@ author:
 
 # Social links
 github_username: kurry
-# twitter_username: username
-# linkedin_username: username
 
 # Build settings
 future: false

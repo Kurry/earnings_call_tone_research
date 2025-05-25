@@ -4,7 +4,7 @@ setup(
     name="earnings_call_tone_research",
     version="0.1.0",
     description="Analyze the tone of company earnings calls",
-    author="User",
+    author="Kurry Tran",
     packages=find_packages(include=["src", "src.*", "research", "research.*"]),
     package_dir={"": "."},
     python_requires=">=3.8",
@@ -23,7 +23,7 @@ setup(
         # Utilities
         "tqdm",
         "pyyaml",
-        "alpahalens-reloaded",
+        "alphalens-reloaded",
     ],
     extras_require={
         "dev": [

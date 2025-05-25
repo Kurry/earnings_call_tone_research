@@ -85,7 +85,7 @@ To reproduce these results:
 
 ```bash
 # Clone the repository
-git clone https://github.com/USERNAME/earnings_call_tone_research.git
+git clone https://github.com/kurry/earnings_call_tone_research.git
 cd earnings_call_tone_research
 
 # Install dependencies
