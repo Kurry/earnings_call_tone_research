@@ -37,6 +37,10 @@ earnings_call_tone_research/
 
 No other data sources or credentials are required.
 
+### Transcript Data for Sentiment Analysis
+The sentiment analysis component of this research relies on earnings call transcripts. The specific dataset used for building or applying the sentiment models can be found at:
+- [Kurry's S&P 500 Earnings Transcripts on Hugging Face](https://huggingface.co/datasets/kurry/sp500_earnings_transcripts)
+
 ---
 
 ## Tone-Dispersion Calculation  🛈
@@ -109,9 +113,9 @@ You can host the backtest results and tear sheet using GitHub Pages:
 3. In your GitHub repository settings, enable Pages with:
    - Source: *main* branch
    - Folder: */ (root)*
-4. Navigate to `https://<username>.github.io/earnings_call_tone_research/outputs/tearsheet.html` to view the tear sheet.
+4. Navigate to `https://kurry.github.io/earnings_call_tone_research/outputs/tearsheet.html` to view the tear sheet.
 
 ---
 ## License
 
-MIT – use, adapt, and share.
+This project is licensed under the MIT License.
