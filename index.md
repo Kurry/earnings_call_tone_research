@@ -95,9 +95,12 @@ pip install -r requirements.txt
 python run_backtest.py
 ```
 
-## Research Team
+## Author
 
-This research was conducted using advanced quantitative finance techniques and natural language processing methods. The analysis demonstrates the practical application of behavioral finance principles in systematic trading strategies.
+This research was conducted by **Kurry Tran** using advanced quantitative finance techniques and natural language processing methods. The analysis demonstrates the practical application of behavioral finance principles in systematic trading strategies.
+
+**Contact**: kurry.tran@gmail.com  
+**GitHub**: [github.com/kurry](https://github.com/kurry)
 
 ---
 

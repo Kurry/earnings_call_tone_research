@@ -2,7 +2,7 @@
 title: "Earnings Call Tone Dispersion Research"
 description: "A quantitative analysis of tone dispersion in earnings calls and its predictive power for stock returns"
 baseurl: ""
-url: "https://USERNAME.github.io/earnings_call_tone_research"
+url: "https://kurry.github.io/earnings_call_tone_research"
 
 # Theme
 theme: minima
@@ -56,11 +56,11 @@ exclude:
 
 # Author
 author:
-  name: "Earnings Call Research Team"
-  email: "research@example.com"
+  name: "Kurry Tran"
+  email: "kurry.tran@gmail.com"
 
-# Social links (optional)
-# github_username: username
+# Social links
+github_username: kurry
 # twitter_username: username
 # linkedin_username: username
 

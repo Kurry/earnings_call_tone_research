@@ -10,9 +10,9 @@ This guide explains how to set up and deploy the earnings call tone research doc
    - Under **Source**, select **GitHub Actions**
    - The site will automatically deploy from the `docs/` folder
 
-2. **Update Repository URL**:
-   - Edit `docs/_config.yml`
-   - Replace `url: "https://USERNAME.github.io/earnings_call_tone_research"` with your actual GitHub username
+2. **Repository URL**:
+   - The URL is already configured for `https://kurry.github.io/earnings_call_tone_research`
+   - No changes needed unless you fork to a different account
 
 3. **Push Changes**:
    ```bash
@@ -22,7 +22,7 @@ This guide explains how to set up and deploy the earnings call tone research doc
    ```
 
 4. **Access Your Site**:
-   - Visit `https://[YOUR_USERNAME].github.io/earnings_call_tone_research`
+   - Visit `https://kurry.github.io/earnings_call_tone_research`
    - The site will be available within a few minutes
 
 ## Site Structure
